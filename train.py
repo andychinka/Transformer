@@ -32,6 +32,18 @@ def train_model(model, opt):
             trg = batch.trg.transpose(0,1)
             trg_input = trg[:, :-1]
             src_mask, trg_mask = create_masks(src, trg_input, opt)
+            # Input:
+            # =======================================
+            # src: (batch_size, # src.words),
+            # trg_input: (batch_size, # trg.words),
+            # src_mask: (batch_size, 1, # src.words),
+            # target_mask: (batch_size, # trg.words, # trg.words),
+            # =======================================
+            #
+            # Output:
+            # =======================================
+            # preds: (batch_size, #trg.words, 23469)
+            # =======================================
             preds = model(src, trg_input, src_mask, trg_mask)
             ys = trg[:, 1:].contiguous().view(-1)
             opt.optimizer.zero_grad()
@@ -88,8 +100,8 @@ def main():
     opt = parser.parse_args()
     
     opt.device = 0 if opt.no_cuda is False else -1
-    if opt.device == 0:
-        assert torch.cuda.is_available()
+    # if opt.device == 0:
+    #     assert torch.cuda.is_available()
     
     read_data(opt)
     SRC, TRG = create_fields(opt)
